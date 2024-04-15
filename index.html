@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dependency Injection Calculator</title>
+<style>
+  .operation-container {
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+  <h1>Calculator</h1>
+  <div>
+    <input type="number" id="num1" placeholder="Enter number 1">
+    <input type="number" id="num2" placeholder="Enter number 2">
+  </div>
+  <div class="operation-container">
+    <button onclick="calculate('add')">Add</button>
+    <button onclick="calculate('subtract')">Subtract</button>
+    <button onclick="calculate('multiply')">Multiply</button>
+    <button onclick="calculate('divide')">Divide</button>
+  </div>
+  <div id="result"></div>
+
+<script>
+  // Dependency Injector
+  class Injector {
+    constructor() {
+      this.dependencies = new Map();
+    }
+
+    register(name, dependency) {
+      this.dependencies.set(name, dependency);
+    }
+
+    resolve(name) {
+      const dependency = this.dependencies.get(name);
+      if (!dependency) {
+        throw new Error(`Dependency '${name}' not found.`);
+      }
+      return dependency;
+    }
+  }
+
+  // Calculator service
+  class Calculator {
+    add(a, b) {
+      return a + b;
+    }
+
+    subtract(a, b) {
+      return a - b;
+    }
+
+    multiply(a, b) {
+      return a * b;
+    }
+
+    divide(a, b) {
+      if (b === 0) {
+        return "Cannot divide by zero!";
+      }
+      return a / b;
+    }
+  }
+
+  // UI component
+  class UI {
+    constructor(calculator) {
+      this.calculator = calculator;
+    }
+
+    calculate(operation) {
+      const num1 = parseFloat(document.getElementById('num1').value);
+      const num2 = parseFloat(document.getElementById('num2').value);
+      let result;
+      switch (operation) {
+        case 'add':
+          result = this.calculator.add(num1, num2);
+          break;
+        case 'subtract':
+          result = this.calculator.subtract(num1, num2);
+          break;
+        case 'multiply':
+          result = this.calculator.multiply(num1, num2);
+          break;
+        case 'divide':
+          result = this.calculator.divide(num1, num2);
+          break;
+        default:
+          result = "Invalid operation";
+      }
+      document.getElementById('result').innerText = `Result: ${result}`;
+    }
+  }
+
+  // Create an instance of the injector
+  const injector = new Injector();
+
+  // Register dependencies
+  injector.register('calculator', new Calculator());
+
+  // Resolve dependencies and create UI
+  const ui = new UI(injector.resolve('calculator'));
+
+  // Calculate function called from the button click event
+  function calculate(operation) {
+    ui.calculate(operation);
+  }
+</script>
+</body>
+</html>
